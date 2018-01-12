@@ -27,6 +27,7 @@ int main(void)
 	int			i;
 
 	c = 0;
+	i = 0;
 	l = setlocale(LC_ALL, "");
 	test = (char **)(long)0x7fff5f17ba14;
 	or = (int*)(long)0x7fff56200a08;
@@ -34,7 +35,6 @@ int main(void)
 	ldec = 3659855789;
 	dec = 654321;
 
-	i = 0;
 	i = ft_printf( TEST_PRINTF );
 	printf(" i = %d ", i);
 	return 0;

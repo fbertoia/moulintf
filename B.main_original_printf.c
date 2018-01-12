@@ -34,6 +34,7 @@ int main(void)
 	mr = (int*)(long)0x7fff5ece1a18;
 	ldec = 3659855789;
 	dec = 654321;
+	
 	i = printf( TEST_PRINTF );
 	printf(" i = %d ", i);
 	return 0;
