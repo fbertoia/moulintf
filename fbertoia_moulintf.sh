@@ -99,7 +99,7 @@ if [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 	CFLAGS=""
 fi
 
-echo "" > tmp_error
+echo "" > log
 echo "" > error_compilation
 let "i = 0"
 LINES=`wc -l $TESTS_FILE | sed "s/[^0-9]*//g"`
@@ -116,7 +116,7 @@ fi
 #============Verification des sorties memoires=============
 
 if [ $FSANITIZE -eq 1 ]; then
-	sed -i bak "s/-Wall -Wextra -Werror/-Wall -Wextra -Werror -fsanitize=address/" `find .. -name "Makefile"` 
+	sed -i bak "s/-Wall -Wextra -Werror/-Wall -Wextra -Werror -fsanitize=address/" `find .. -name "Makefile"`
 	make re -C $MAKEFILE
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
 	gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
@@ -136,14 +136,14 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS -DTEST_PRINTF=\"$LINE_TEST\" $SRC_ORIGINAL_PRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_ORIGINAL_PRINTF"; fi;
 		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_MYPRINTF 2>> myprintf_error_compilation
 		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_ORIGINAL_PRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_ORIGINAL_PRINTF 2>> error_compilation
-		
+
 		if [ $? -eq 0 ] || [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
-			TMP_M=`./$NAME_MYPRINTF 2>> tmp_error`
+			TMP_M=`./$NAME_MYPRINTF 2>> log`
 			if [ $DISPLAY -eq 1 ]; then echo "|$TMP_M|"; fi;
-			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>tmp_error`
+			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log`
 			if [ $DISPLAY -eq 1 ]; then echo "$LEAKS ./$NAME_MYPRINTF"; fi;
 			if [ "$LEAKS" == "valgrind" ]
-			then 
+			then
 				TMP_LEAK=`$LEAKS ./$NAME_MYPRINTF 2>&1 | grep -E "definitely lost|indirectly lost" | grep -E "==[1-9]*==[a-zA-Z :]*[1-9]"`
 			else
 				TMP_LEAK=""
@@ -152,9 +152,9 @@ if [ $PRINTF_TEST -eq 1 ]; then
 			if [ "$TMP_M" == "$TMP_O" ] && [ "$TMP_LEAK" = "" ]; then
 				printf "\033[0;32m▓\033[0;0m"
 			else
-				echo "\n\nLigne testee $i : { $LINE_TEST }" >> tmp_error
-				echo "\nYour printf :    |`echo "|$TMP_M|"`|" | tr -d '\n' >> tmp_error
-				echo "\nThe real printf :|`echo "|$TMP_O|"`|" >> tmp_error
+				echo "\n\nLigne testee $i : { $LINE_TEST }" >> log
+				echo "\nYour printf :    |`echo "|$TMP_M|"`|" | tr -d '\n' >> log
+				echo "\nThe real printf :|`echo "|$TMP_O|"`|" >> log
 				printf "\033[0;31m▓\033[0;0m"
 			fi
 			sleep $SLEEP
@@ -162,5 +162,5 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		fi
 	done
 	printf "\n${COLOR_YELLOW}========Affichage des erreurs=======${COLOR_NC}\n" "$LINE_TEST"
-	cat tmp_error
+	cat log
 fi
