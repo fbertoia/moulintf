@@ -6,7 +6,7 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/01/11 10:31:04 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/04 17:40:34 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,7 +39,7 @@ PATH_HEADER=.
 LIBFT_NAME=`find .. -type f | grep -e libft\\.a$ | head -n 1`
 MAKEFILE_FILE=`find .. -name Makefile | head -n 1`
 MAKEFILE=`dirname $MAKEFILE_FILE`
-LIBFTPRINTF=$LIBFT_NAME #`find .. -type f | grep -e printf\\.a$ | head -n 1`
+LIBFTPRINTF=`find .. -type f | grep -e printf\\.a$ | head -n 1`
 INCLUDE_FILE=`find .. -type f | grep -e printf\\.h$`
 INCLUDE=`dirname $INCLUDE_FILE`
 AUTHOR=`find .. \( -name auteur -o -name author \) | head -n 1`
@@ -53,12 +53,12 @@ TESTS_FILE=B.tests_file
 let "VALGRIND_INSTALL = 0"
 let "LEAKS = 0"
 let "TEST_FORM = 0"
-let "UNDEFINED_BEHAVIOUR = 1"
-let "DISPLAY = 1"
-let "BUFFER_TEST = 1"
-let "PRINTF_TEST = 0"
+let "UNDEFINED_BEHAVIOUR = 0"
+let "DISPLAY = 0"
+let "BUFFER_TEST = 0"
+let "PRINTF_TEST = 1"
 let "FSANITIZE = 0"
-CYCLE=0
+CYCLE=2
 SLEEP="0s"
 
 
