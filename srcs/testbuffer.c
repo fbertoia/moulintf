@@ -24,7 +24,7 @@ int main(void)
 	while (i < BUFF_SIZE)
 		buf[i++]= '.';
 	buf[i] = 0;
-	printf("TEST OF A BIG STRING\n")
+	printf("TEST OF A BIG STRING\n");
 	i = printf("printf : |%s|\n", buf);
 	j = ft_printf("ft_printf : |%s|\n", buf);
 	printf(" The real printf returns %d, yours returns %d \n", i, j);
@@ -33,10 +33,15 @@ int main(void)
 	j = ft_printf(buf);
 	printf(" The real printf returns %d, yours returns %d \n", i, j);
 	buf[0] = 0;
-	printf("TEST OF A BIG WIDTH\n");
+	printf("TEST OF A WIDTH/PRECISION = INT_MIN\n");
 	i = printf("printf : |%2147483648.2147483648s|\n", buf);
 	j = ft_printf("ft_printf : |%2147483648.2147483648s|\n", buf);
 	printf(" The real printf returns %d, yours returns %d \n", i, j);
+	printf("TEST OF A WIDTH/PRECISION = INT_MAX\n");
+	i = printf("printf : |%2147483647.2147483647s|\n", buf);
+	j = ft_printf("ft_printf : |%2147483647.2147483647s|\n", buf);
+	printf(" The real printf returns %d, yours returns %d \n", i, j);
+	printf("TEST OF A WIDTH/PRECISION = INT_MAX\n");
 	i = printf("printf : |%2147483647.2147483647s|\n", buf);
 	j = ft_printf("ft_printf : |%2147483647.2147483647s|\n", buf);
 	printf(" The real printf returns %d, yours returns %d \n", i, j);
