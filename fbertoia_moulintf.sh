@@ -52,12 +52,12 @@ TESTS_FILE=$SRC_PATH/all_tests
 
 #==== Test a effectuer =====
 let "VALGRIND_INSTALL = 0"
-let "LEAKS = 0"
+let "LEAKS = 1"
 let "TEST_FORM = 0"
 let "UNDEFINED_BEHAVIOUR = 0"
 let "DISPLAY = 0"
-let "BUFFER_TEST = 0"
-let "PRINTF_TEST = 1"
+let "BUFFER_TEST = 1"
+let "PRINTF_TEST = 0"
 let "FSANITIZE = 0"
 CYCLE=2
 SLEEP="0s"
@@ -109,7 +109,7 @@ LINES=`wc -l $TESTS_FILE | sed "s/[^0-9]*//g"`
 if [ $BUFFER_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du buffer =====${COLOR_NC}\n"
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
-	gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
+	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
 	./$NAME_BUFFER_TEST
 fi
 
@@ -162,5 +162,6 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		fi
 	done
 	printf "\n${COLOR_YELLOW}========Affichage des erreurs=======${COLOR_NC}\n" "$LINE_TEST"
+	rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF
 	cat log
 fi
