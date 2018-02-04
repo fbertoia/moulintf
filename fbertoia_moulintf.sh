@@ -101,7 +101,7 @@ if [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 fi
 
 echo "" > log
-echo "" > error_compilation
+echo "" > printf_error_compilation
 let "i = 0"
 LINES=`wc -l $TESTS_FILE | sed "s/[^0-9]*//g"`
 
@@ -139,8 +139,8 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		if [ $DISPLAY -eq 1 ]; then printf "\n${COLOR_YELLOW}Test %d: %s${COLOR_NC}\n" $i "$LINE_TEST"; fi;
 		if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS -DTEST_PRINTF=\"$LINE_TEST\" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_MYPRINTF"; fi;
 		if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS -DTEST_PRINTF=\"$LINE_TEST\" $SRC_ORIGINAL_PRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_ORIGINAL_PRINTF"; fi;
-		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_MYPRINTF 2>> myprintf_error_compilation
-		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_ORIGINAL_PRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_ORIGINAL_PRINTF 2>> error_compilation
+		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_MYPRINTF 2>> ft_printf_error_compilation
+		gcc $CFLAGS -DTEST_PRINTF="$LINE_TEST" $SRC_ORIGINAL_PRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_ORIGINAL_PRINTF 2>> printf_error_compilation
 
 		if [ $? -eq 0 ] || [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 			TMP_M=`./$NAME_MYPRINTF 2>> log`
