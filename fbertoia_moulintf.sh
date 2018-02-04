@@ -52,13 +52,14 @@ TESTS_FILE=$SRC_PATH/all_tests
 
 #==== Test a effectuer =====
 let "VALGRIND_INSTALL = 0"
-let "LEAKS = 1"
+let "LEAKS = 0"
 let "TEST_FORM = 0"
 let "UNDEFINED_BEHAVIOUR = 0"
 let "DISPLAY = 0"
-let "BUFFER_TEST = 1"
-let "PRINTF_TEST = 0"
+let "BUFFER_TEST = 0"
+let "PRINTF_TEST = 1"
 let "FSANITIZE = 0"
+let "OPTION_PRINTF = 0"
 CYCLE=2
 SLEEP="0s"
 
@@ -128,6 +129,10 @@ fi
 if [ $PRINTF_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du printf || Nombre de tests : %d =====${COLOR_NC}\n" $LINES
 	cat $TESTS_FILE | while read LINE_TEST; do
+		OPTION_RET=`grep -e '%[# +-.hlzj\d]*[fFeEgGaAb*]' <<< $LINE_TEST`
+		if [ $? -eq 0 ] && [ $OPTION_PRINTF -eq 0 ]  ; then
+			continue
+		fi
 		if [ ` bc <<< "$i % 100" | cut -d "." -f2 ` -eq 0 ]; then printf "\n${COLOR_YELLOW}Test %d - `bc <<< "$i + 100"\
 		| cut -d "." -f2`${COLOR_NC}\n" $i; fi;
 		let "i++"
