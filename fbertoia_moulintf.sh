@@ -6,7 +6,7 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/02/04 17:40:34 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/04 18:35:50 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,9 +32,9 @@ COLOR_GRAY='\e[30;1m'
 COLOR_LIGHT_GRAY='\e[37;1m'
 
 #==============Files to include
-NAME_MYPRINTF=myprintf
-NAME_ORIGINAL_PRINTF=originalprintf
-NAME_BUFFER_TEST=maintestbuffer
+NAME_MYPRINTF=ft_printf
+NAME_ORIGINAL_PRINTF=printf
+NAME_BUFFER_TEST=testbuffer
 PATH_HEADER=.
 LIBFT_NAME=`find .. -type f | grep -e libft\\.a$ | head -n 1`
 MAKEFILE_FILE=`find .. -name Makefile | head -n 1`
@@ -44,10 +44,11 @@ INCLUDE_FILE=`find .. -type f | grep -e printf\\.h$`
 INCLUDE=`dirname $INCLUDE_FILE`
 AUTHOR=`find .. \( -name auteur -o -name author \) | head -n 1`
 CFLAGS="-Wall -Wextra -Werror"
-SRC_MYPRINTF=B.mainyour.c
-SRC_ORIGINAL_PRINTF=B.main_original_printf.c
-SRC_BUFFER_TEST=B.maintestbuffer.c
-TESTS_FILE=B.tests_file
+SRC_PATH=./srcs
+SRC_MYPRINTF=$SRC_PATH/ft_printf.c
+SRC_ORIGINAL_PRINTF=$SRC_PATH/printf.c
+SRC_BUFFER_TEST=$SRC_PATH/testbuffer.c
+TESTS_FILE=$SRC_PATH/all_tests
 
 #==== Test a effectuer =====
 let "VALGRIND_INSTALL = 0"
