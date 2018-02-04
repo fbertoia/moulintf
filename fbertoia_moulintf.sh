@@ -129,8 +129,9 @@ fi
 if [ $PRINTF_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du printf || Nombre de tests : %d =====${COLOR_NC}\n" $LINES
 	cat $TESTS_FILE | while read LINE_TEST; do
-		OPTION_RET=`grep -e '%[# +-.hlzj\d]*[fFeEgGaAb*]' <<< $LINE_TEST`
+		OPTION_RET=`grep -e '%[# +-.hlzj\d]*[fFeEgGaAb\*]' <<< $LINE_TEST`
 		if [ $? -eq 0 ] && [ $OPTION_PRINTF -eq 0 ]  ; then
+			echo $OPTION_RET
 			continue
 		fi
 		if [ ` bc <<< "$i % 100" | cut -d "." -f2 ` -eq 0 ]; then printf "\n${COLOR_YELLOW}Test %d - `bc <<< "$i + 100"\
@@ -167,6 +168,6 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		fi
 	done
 	printf "\n${COLOR_YELLOW}========Affichage des erreurs=======${COLOR_NC}\n" "$LINE_TEST"
-	rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF
+	rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF $NAME_BUFFER_TEST
 	cat log
 fi
