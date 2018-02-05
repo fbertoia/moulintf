@@ -15,7 +15,7 @@
 #==== Test a effectuer =====
 let "VALGRIND_INSTALL = 0"
 let "LEAKS = 0"
-let "TEST_FORM = 1"
+let "TEST_FORM = 0"
 let "UNDEFINED_BEHAVIOUR = 0"
 let "DISPLAY = 0"
 let "BUFFER_TEST = 0"
@@ -104,7 +104,11 @@ if [ $BUFFER_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du buffer =====${COLOR_NC}\n"
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
 	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
-	./$NAME_BUFFER_TEST || exit 1
+	./$NAME_BUFFER_TEST
+	if [ $? -ne 0 ]; then
+		printf "${COLOR_RED}==== YOU CRASHED =====${COLOR_NC}\n"
+		exit 1
+	fi
 fi
 
 #============Verification des sorties memoires=============
@@ -137,8 +141,12 @@ if [ $PRINTF_TEST -eq 1 ]; then
 
 		if [ $? -eq 0 ] || [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 			TMP_M=`./$NAME_MYPRINTF 2>> log`
+			if [ $? -ne 0 ]; then
+				printf "${COLOR_RED}==== YOU CRASHED : test $LINE_TEST =====${COLOR_NC}\n"
+				exit 1
+			fi
 			if [ $DISPLAY -eq 1 ]; then echo "|$TMP_M|"; fi;
-			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log` || exit 1
+			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log`
 			if [ $DISPLAY -eq 1 ]; then echo "$LEAKS ./$NAME_MYPRINTF"; fi;
 			if [ "$LEAKS" == "valgrind" ]
 			then
@@ -160,6 +168,6 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		fi
 	done
 	printf "\n${COLOR_YELLOW}========Affichage des erreurs=======${COLOR_NC}\n" "$LINE_TEST"
-	rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF $NAME_BUFFER_TEST
+	# rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF $NAME_BUFFER_TEST
 	cat log
 fi
