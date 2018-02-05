@@ -6,16 +6,16 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/02/05 11:21:09 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/05 13:52:36 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #!/bin/bash
 
-#==== Test a effectuer =====
+#==== Test to do : to make them, change their value from 0 to 1 =====
 let "VALGRIND_INSTALL = 0"
 let "LEAKS = 0"
-let "TEST_FORM = 0"
+let "TEST_FORM = 1"
 let "UNDEFINED_BEHAVIOUR = 0"
 let "DISPLAY = 0"
 let "BUFFER_TEST = 0"
@@ -26,7 +26,7 @@ CYCLE=2
 SLEEP="0s"
 
 
-#==============Files to include
+#============== Files to include =========================
 NAME_MYPRINTF=ft_printf
 NAME_ORIGINAL_PRINTF=printf
 NAME_BUFFER_TEST=testbuffer
@@ -45,7 +45,7 @@ SRC_ORIGINAL_PRINTF=$SRC_PATH/printf.c
 SRC_BUFFER_TEST=$SRC_PATH/testbuffer.c
 TESTS_FILE=$SRC_PATH/all_tests
 
-#==============Colors
+#============== Colors =======================
 COLOR_NC='\e[0m' # No Color
 COLOR_WHITE='\e[37;1m'
 COLOR_BLACK='\e[30;1m'
@@ -55,7 +55,7 @@ COLOR_CYAN='\e[36;1m'
 COLOR_RED="\e[31;1m"
 COLOR_YELLOW='\e[33;1m'
 
-#==============Install Valgrin
+#==============Install Valgrin ===============
 if [ $VALGRIND_INSTALL -eq 1 ]; then
 	brew update
 	brew install VALGRIND_INSTALL
@@ -63,8 +63,8 @@ if [ $VALGRIND_INSTALL -eq 1 ]; then
 	source ~/.bashrc
 fi
 
-#============== Lancement des tests ==============
-#..................Tests de forme.................
+#============== Launch the tests ==============
+#..................Test the norm and the forbidden functions.................
 clear
 if [ $TEST_FORM -eq 1 ]; then
 	printf "${COLOR_GREEN}====Norminette====\n${COLOR_NC}"
@@ -72,8 +72,8 @@ if [ $TEST_FORM -eq 1 ]; then
 	sleep 2s ; make -C $MAKEFILE
 	printf "${COLOR_GREEN}ALLOWED FUNCTION : \nwrite \nread\nmalloc\nfree\nexit\n\n${COLOR_NC}"
 	printf "${COLOR_GREEN}FUNCTION USED :${COLOR_NC}\n"
-	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
-	nm -u ./$NAME_BUFFER_TEST | sed "s/_printf/&    (used by the moulintf)/g"
+	gcc -DTEST_PRINTF=\"\" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $SRC_MYPRINTF
+	nm -u ./$SRC_MYPRINTF
 	if [ "$AUTHOR" == "" ]; then AUTHOR="********MISSING********"; fi;
 	printf "\n\n${COLOR_YELLOW}Fichier auteur :${COLOR_NC} $AUTHOR\n\n"
 	sleep 5s
@@ -98,7 +98,7 @@ echo "" > printf_error_compilation
 let "i = 0"
 LINES=`wc -l $TESTS_FILE | sed "s/[^0-9]*//g"`
 
-#============Verification du buffer==============
+#============ Buffer tests ==============
 
 if [ $BUFFER_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du buffer =====${COLOR_NC}\n"
@@ -111,18 +111,18 @@ if [ $BUFFER_TEST -eq 1 ]; then
 	fi
 fi
 
-#============Verification des sorties memoires=============
+#============ Test the leaks =============
 
 if [ $FSANITIZE -eq 1 ]; then
 	sed -i bak "s/-Wall -Wextra -Werror/-Wall -Wextra -Werror -fsanitize=address/" `find .. -name "Makefile"`
 	make re -C $MAKEFILE
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
-	gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
+	gcc $CFLAGS $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
 	sed -i bak "s/-Wall -Wextra -Werror -fsanitize=address/-Wall -Wextra -Werror/" `find .. -name "Makefile"`
 	make re -C $MAKEFILE
 fi
 
-#============Verification du printf==============
+#============ Test ft_printf ==============
 if [ $PRINTF_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du printf || Nombre de tests : %d =====${COLOR_NC}\n" $LINES
 	cat $TESTS_FILE | while read LINE_TEST; do
