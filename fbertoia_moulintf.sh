@@ -6,30 +6,25 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/02/04 18:35:50 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/05 11:21:09 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #!/bin/bash
 
-#==============Colors
-COLOR_NC='\e[0m' # No Color
-COLOR_WHITE='\e[37;1m'
-COLOR_BLACK='\e[30;1m'
-COLOR_BLUE='\e[34;1m'
-COLOR_LIGHT_BLUE='\e[34;1m'
-COLOR_GREEN='\e[32;1m'
-COLOR_LIGHT_GREEN='\e[32;1m'
-COLOR_CYAN='\e[36;1m'
-COLOR_LIGHT_CYAN='\e[36;1m'
-COLOR_RED="\e[31;1m"
-COLOR_LIGHT_RED='\e[31;1m'
-COLOR_PURPLE='\e[35;1m'
-COLOR_LIGHT_PURPLE='\e[35;1m'
-COLOR_BROWN='\e[33;1m'
-COLOR_YELLOW='\e[33;1m'
-COLOR_GRAY='\e[30;1m'
-COLOR_LIGHT_GRAY='\e[37;1m'
+#==== Test a effectuer =====
+let "VALGRIND_INSTALL = 0"
+let "LEAKS = 0"
+let "TEST_FORM = 1"
+let "UNDEFINED_BEHAVIOUR = 0"
+let "DISPLAY = 0"
+let "BUFFER_TEST = 0"
+let "PRINTF_TEST = 1"
+let "FSANITIZE = 0"
+let "OPTION_PRINTF = 0"
+CYCLE=2
+SLEEP="0s"
+
 
 #==============Files to include
 NAME_MYPRINTF=ft_printf
@@ -50,19 +45,15 @@ SRC_ORIGINAL_PRINTF=$SRC_PATH/printf.c
 SRC_BUFFER_TEST=$SRC_PATH/testbuffer.c
 TESTS_FILE=$SRC_PATH/all_tests
 
-#==== Test a effectuer =====
-let "VALGRIND_INSTALL = 0"
-let "LEAKS = 0"
-let "TEST_FORM = 0"
-let "UNDEFINED_BEHAVIOUR = 0"
-let "DISPLAY = 0"
-let "BUFFER_TEST = 0"
-let "PRINTF_TEST = 1"
-let "FSANITIZE = 0"
-let "OPTION_PRINTF = 0"
-CYCLE=2
-SLEEP="0s"
-
+#==============Colors
+COLOR_NC='\e[0m' # No Color
+COLOR_WHITE='\e[37;1m'
+COLOR_BLACK='\e[30;1m'
+COLOR_BLUE='\e[34;1m'
+COLOR_GREEN='\e[32;1m'
+COLOR_CYAN='\e[36;1m'
+COLOR_RED="\e[31;1m"
+COLOR_YELLOW='\e[33;1m'
 
 #==============Install Valgrin
 if [ $VALGRIND_INSTALL -eq 1 ]; then
@@ -77,13 +68,15 @@ fi
 clear
 if [ $TEST_FORM -eq 1 ]; then
 	printf "${COLOR_GREEN}====Norminette====\n${COLOR_NC}"
-	norminette | grep Error
+	norminette `find .. -name "*.[ch]" | sed "s/.*moulintf.*//g"` | grep -B 1 Error
 	sleep 2s ; make -C $MAKEFILE
-	printf "${COLOR_GREEN}write \nread\nmalloc\nfree\nexit\n${COLOR_NC}"
-	printf "${COLOR_GREEN}====checker====\n${COLOR_NC}"
-	nm -u ./$NAME_MYPRINTF
-	printf "${COLOR_YELLOW}Fichier auteur : `cat $AUTHOR` ${COLOR_NC}"
-	sleep 10s
+	printf "${COLOR_GREEN}ALLOWED FUNCTION : \nwrite \nread\nmalloc\nfree\nexit\n\n${COLOR_NC}"
+	printf "${COLOR_GREEN}FUNCTION USED :${COLOR_NC}\n"
+	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
+	nm -u ./$NAME_BUFFER_TEST | sed "s/_printf/&    (used by the moulintf)/g"
+	if [ "$AUTHOR" == "" ]; then AUTHOR="********MISSING********"; fi;
+	printf "\n\n${COLOR_YELLOW}Fichier auteur :${COLOR_NC} $AUTHOR\n\n"
+	sleep 5s
 else
 	clear && make re -C $MAKEFILE
 fi
@@ -111,7 +104,7 @@ if [ $BUFFER_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du buffer =====${COLOR_NC}\n"
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
 	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
-	./$NAME_BUFFER_TEST
+	./$NAME_BUFFER_TEST || exit 1
 fi
 
 #============Verification des sorties memoires=============
@@ -131,7 +124,6 @@ if [ $PRINTF_TEST -eq 1 ]; then
 	cat $TESTS_FILE | while read LINE_TEST; do
 		OPTION_RET=`grep -e '%[# +-.hlzj\d]*[fFeEgGaAb\*]' <<< $LINE_TEST`
 		if [ $? -eq 0 ] && [ $OPTION_PRINTF -eq 0 ]  ; then
-			echo $OPTION_RET
 			continue
 		fi
 		if [ ` bc <<< "$i % 100" | cut -d "." -f2 ` -eq 0 ]; then printf "\n${COLOR_YELLOW}Test %d - `bc <<< "$i + 100"\
@@ -146,7 +138,7 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		if [ $? -eq 0 ] || [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 			TMP_M=`./$NAME_MYPRINTF 2>> log`
 			if [ $DISPLAY -eq 1 ]; then echo "|$TMP_M|"; fi;
-			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log`
+			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log` || exit 1
 			if [ $DISPLAY -eq 1 ]; then echo "$LEAKS ./$NAME_MYPRINTF"; fi;
 			if [ "$LEAKS" == "valgrind" ]
 			then
