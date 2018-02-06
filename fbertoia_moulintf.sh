@@ -6,7 +6,7 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/02/05 11:21:09 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/06 15:11:31 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,7 +75,7 @@ if [ $TEST_FORM -eq 1 ]; then
 	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
 	nm -u ./$NAME_BUFFER_TEST | sed "s/_printf/&    (used by the moulintf)/g"
 	if [ "$AUTHOR" == "" ]; then AUTHOR="********MISSING********"; fi;
-	printf "\n\n${COLOR_YELLOW}Fichier auteur :${COLOR_NC} $AUTHOR\n\n"
+	printf "\n\n${COLOR_YELLOW}Fichier auteur :${COLOR_NC}`cat $AUTHOR`\n\n"
 	sleep 5s
 else
 	clear && make re -C $MAKEFILE
