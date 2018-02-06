@@ -6,13 +6,13 @@
 #    By: fbertoia <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/01/11 10:31:02 by fbertoia          #+#    #+#              #
-#    Updated: 2018/02/05 13:52:36 by fbertoia         ###   ########.fr        #
+#    Updated: 2018/02/05 11:21:09 by fbertoia         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #!/bin/bash
 
-#==== Test to do : to make them, change their value from 0 to 1 =====
+#==== Test a effectuer =====
 let "VALGRIND_INSTALL = 0"
 let "LEAKS = 0"
 let "TEST_FORM = 1"
@@ -26,7 +26,7 @@ CYCLE=2
 SLEEP="0s"
 
 
-#============== Files to include =========================
+#==============Files to include
 NAME_MYPRINTF=ft_printf
 NAME_ORIGINAL_PRINTF=printf
 NAME_BUFFER_TEST=testbuffer
@@ -45,7 +45,7 @@ SRC_ORIGINAL_PRINTF=$SRC_PATH/printf.c
 SRC_BUFFER_TEST=$SRC_PATH/testbuffer.c
 TESTS_FILE=$SRC_PATH/all_tests
 
-#============== Colors =======================
+#==============Colors
 COLOR_NC='\e[0m' # No Color
 COLOR_WHITE='\e[37;1m'
 COLOR_BLACK='\e[30;1m'
@@ -55,7 +55,7 @@ COLOR_CYAN='\e[36;1m'
 COLOR_RED="\e[31;1m"
 COLOR_YELLOW='\e[33;1m'
 
-#==============Install Valgrin ===============
+#==============Install Valgrin
 if [ $VALGRIND_INSTALL -eq 1 ]; then
 	brew update
 	brew install VALGRIND_INSTALL
@@ -63,8 +63,8 @@ if [ $VALGRIND_INSTALL -eq 1 ]; then
 	source ~/.bashrc
 fi
 
-#============== Launch the tests ==============
-#..................Test the norm and the forbidden functions.................
+#============== Lancement des tests ==============
+#..................Tests de forme.................
 clear
 if [ $TEST_FORM -eq 1 ]; then
 	printf "${COLOR_GREEN}====Norminette====\n${COLOR_NC}"
@@ -72,8 +72,8 @@ if [ $TEST_FORM -eq 1 ]; then
 	sleep 2s ; make -C $MAKEFILE
 	printf "${COLOR_GREEN}ALLOWED FUNCTION : \nwrite \nread\nmalloc\nfree\nexit\n\n${COLOR_NC}"
 	printf "${COLOR_GREEN}FUNCTION USED :${COLOR_NC}\n"
-	gcc -DTEST_PRINTF=\"\" $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $SRC_MYPRINTF
-	nm -u ./$SRC_MYPRINTF
+	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
+	nm -u ./$NAME_BUFFER_TEST | sed "s/_printf/&    (used by the moulintf)/g"
 	if [ "$AUTHOR" == "" ]; then AUTHOR="********MISSING********"; fi;
 	printf "\n\n${COLOR_YELLOW}Fichier auteur :${COLOR_NC} $AUTHOR\n\n"
 	sleep 5s
@@ -98,31 +98,27 @@ echo "" > printf_error_compilation
 let "i = 0"
 LINES=`wc -l $TESTS_FILE | sed "s/[^0-9]*//g"`
 
-#============ Buffer tests ==============
+#============Verification du buffer==============
 
 if [ $BUFFER_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du buffer =====${COLOR_NC}\n"
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
 	gcc -Wall -Wextra -fsanitize=address $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
-	./$NAME_BUFFER_TEST
-	if [ $? -ne 0 ]; then
-		printf "${COLOR_RED}==== YOU CRASHED =====${COLOR_NC}\n"
-		exit 1
-	fi
+	./$NAME_BUFFER_TEST || exit 1
 fi
 
-#============ Test the leaks =============
+#============Verification des sorties memoires=============
 
 if [ $FSANITIZE -eq 1 ]; then
 	sed -i bak "s/-Wall -Wextra -Werror/-Wall -Wextra -Werror -fsanitize=address/" `find .. -name "Makefile"`
 	make re -C $MAKEFILE
 	if [ $DISPLAY -eq 1 ]; then echo "gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST"; fi;
-	gcc $CFLAGS $SRC_MYPRINTF $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
+	gcc $CFLAGS $SRC_BUFFER_TEST $LIBFTPRINTF -I$INCLUDE -o $NAME_BUFFER_TEST
 	sed -i bak "s/-Wall -Wextra -Werror -fsanitize=address/-Wall -Wextra -Werror/" `find .. -name "Makefile"`
 	make re -C $MAKEFILE
 fi
 
-#============ Test ft_printf ==============
+#============Verification du printf==============
 if [ $PRINTF_TEST -eq 1 ]; then
 	printf "${COLOR_YELLOW}==== Test du printf || Nombre de tests : %d =====${COLOR_NC}\n" $LINES
 	cat $TESTS_FILE | while read LINE_TEST; do
@@ -141,12 +137,8 @@ if [ $PRINTF_TEST -eq 1 ]; then
 
 		if [ $? -eq 0 ] || [ $UNDEFINED_BEHAVIOUR -eq 1 ]; then
 			TMP_M=`./$NAME_MYPRINTF 2>> log`
-			if [ $? -ne 0 ]; then
-				printf "${COLOR_RED}==== YOU CRASHED : test $LINE_TEST =====${COLOR_NC}\n"
-				exit 1
-			fi
 			if [ $DISPLAY -eq 1 ]; then echo "|$TMP_M|"; fi;
-			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log`
+			TMP_O=`./$NAME_ORIGINAL_PRINTF 2>>log` || exit 1
 			if [ $DISPLAY -eq 1 ]; then echo "$LEAKS ./$NAME_MYPRINTF"; fi;
 			if [ "$LEAKS" == "valgrind" ]
 			then
@@ -168,6 +160,6 @@ if [ $PRINTF_TEST -eq 1 ]; then
 		fi
 	done
 	printf "\n${COLOR_YELLOW}========Affichage des erreurs=======${COLOR_NC}\n" "$LINE_TEST"
-	# rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF $NAME_BUFFER_TEST
+	rm $NAME_ORIGINAL_PRINTF $NAME_MYPRINTF $NAME_BUFFER_TEST
 	cat log
 fi
